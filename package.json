@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "author": "Houraisan Kaguya",
   "scripts": {
-    "build": "webpack --mode development",
-    "dev": "webpack-dev-server --mode production",
-    "watch": "webpack --watch --mode production",
+    "build": "cross-env NODE_ENV=production webpack --mode development",
+    "dev": "cross-env NODE_ENV=dev webpack-dev-server --mode production",
+    "watch": "cross-env NODE_ENV=watch webpack --watch --mode production",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {

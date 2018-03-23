@@ -1,8 +1,9 @@
 const webpack = require('webpack');
 const path = require('path');
+const ENV = process.env.NODE_ENV;
 const config = {
     entry: {
-        main: path.resolve(__dirname, './src/app.tsx'),
+        main: path.resolve(__dirname, './src/app.ts'),
     },
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -18,6 +19,7 @@ const config = {
         open: true,
         openPage: 'webpack-dev-server/index-dev.html',
     },
+    devtool: (ENV === 'dev' || ENV === 'watch') ? 'eval-source-map' : 'inline-source-map',
     resolve: {
         extensions: ['.tsx', '.ts', '.jsx', '.js']
     },
