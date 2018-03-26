@@ -1,124 +1,133 @@
 import utils from './utils';
-import { GameInterface, Direction } from './game';
+import Game, { GameInterface, Direction } from './game';
 
 interface SnakeInterface extends GameInterface {
     ctx: CanvasRenderingContext2D;
+    cellX: number;
+    cellY: number;
 }
 
 interface SnakeBodyInterface {
-    pos: {
-        x: number;
-        y: number;
-    }
+    x: number;
+    y: number;
 }
 
 class Snake {
     config: SnakeInterface;
-    private nextDir: Direction;
-    private direction: Direction = this.nextDir;
+    nextDir: Direction;
+    direction: Direction = this.nextDir;
+    speedBase: number = 5000;
+    snakeBody: SnakeBodyInterface[] = []; // 以一维数组的形式存储蛇的信息,只需要关注蛇头信息,其他信息由方向推导
     private initialX: number;
     private initialY: number;
-    private stepX: number;
-    private stepY: number;
-    private speedBase: number = 5000;
-    private snakeLength: number = 5;
+    private snakeLength: number = 5; // 初始化的length
     constructor(config: SnakeInterface) {
         this.config = config;
-        this.initialX = utils.getRandomPosition(config.width, config.height).x;
-        this.initialY = utils.getRandomPosition(config.width, config.height).y;
-        this.stepX = this.initialX;
-        this.stepY = this.initialY;
-        this.createSnake({
-            pos: {
-                x: this.initialX,
-                y: this.initialY,
-            }
-        });
-        const interval = () => {
-            setTimeout(() => {
-                if (!this.snakeMove()) {
-                    // 如果到达边界就终止循环, game over
-                    return;
-                }
-                setTimeout(() => {
-                    interval();
-                }, this.speedBase / config.snakeSpeed);
-            }, this.speedBase / config.snakeSpeed);
-        }
-        interval();
-        this.setDirection(3);
-    }
-    createSnake(o: SnakeBodyInterface) {
-        const config = this.config;
-        const pos = o.pos;
-        const ctx = config.ctx;
-        const color = config.snakeColor;
-        ctx.fillStyle = color;
+        const initalPos = utils.getRandomPoint(config.cellX, config.cellY);
+        this.initialX = initalPos.x;
+        this.initialY = initalPos.y;
+        const initDir = Direction.Right;
+        this.setDirection(initDir);
         for (let i = 0; i < this.snakeLength; i++) {
-            switch (this.direction) {
-                case Direction.Up:
-                    pos.y++;
-                    break;
-                case Direction.Down:
-                    pos.y--;
-                    break;
-                case Direction.Left:
-                    pos.x++;
-                    break;
-                case Direction.Right:
-                    pos.x--;
-                    break;
-            }
-            ctx.fillRect(pos.x, pos.y, config.snakeSize, config.snakeSize);
+            this.snakeBody.push({
+                x: this.initialX--,
+                y: this.initialY,
+            });
         }
+
     }
-    clearSnake(o: SnakeBodyInterface) {
+    judjeDir(o: SnakeBodyInterface) {
         const config = this.config;
-        const pos = o.pos;
-        const ctx = this.config.ctx;
-        ctx.clearRect(pos.x, pos.y, config.snakeSize, config.snakeSize);
+        let _x;
+        let _y;
+        switch (this.nextDir) {
+            case (Direction.Up):
+                _x = o.x;
+                _y = o.y -= config.snakeSize;
+                break;
+            case (Direction.Down):
+                _x = o.x;
+                _y = o.y += config.snakeSize;
+                break;
+            case (Direction.Left):
+                _x = o.x -= config.snakeSize;
+                _y = o.y;
+                break;
+            case (Direction.Right):
+                _x = o.x += config.snakeSize;
+                _y = o.y;
+                break;
+        }
+
+        return {
+            x: _x,
+            y: _y,
+        }
     }
     snakeMove() {
-        // if (this.direction !== this.nextDir) {
-        // }
         const config = this.config;
-        config.ctx.beginPath();
-        config.ctx.fillStyle = config.bgColor;
-        config.ctx.strokeStyle = config.borderColor;
-        config.ctx.fillRect(0, 0, config.width, config.height);
-
+        utils.refreshMap({
+            ctx: config.ctx,
+            bgColor: config.bgColor,
+            borderColor: config.borderColor,
+            width: config.width,
+            height: config.height,
+        });
+        let x = this.snakeBody[0].x;
+        let y = this.snakeBody[0].y;
         switch (this.nextDir) {
             case Direction.Up:
-                this.stepY--;
+                y--;
                 break;
             case Direction.Down:
-                this.stepY++;
+                y++;
                 break;
             case Direction.Left:
-                this.stepX--;
+                x--;
                 break;
             case Direction.Right:
-                this.stepX++;
+                x++;
                 break;
         }
-        if (this.stepX >= (config.width - config.snakeSize) || this.stepY >= (config.height - config.snakeSize) || this.stepX < 0 || this.stepY < 0) {
-            // alert('您已到达边界!');
+        this.snakeBody.pop();
+        this.snakeBody.unshift({
+            x: x,
+            y: y,
+        });
+        for (let i = 0; i < this.snakeBody.length; i++) {
+            utils.createPoint({
+                x: this.snakeBody[i].x,
+                y: this.snakeBody[i].y,
+                ctx: config.ctx,
+                size: config.snakeSize,
+                color: config.snakeColor,
+            });
+        }
+        if (this.isKonckWall()) {
             return false;
         }
-
-        this.createSnake({
-            pos: {
-                x: this.stepX,
-                y: this.stepY,
-            }
-        });
-
+        if(this.isKonckSelf()) {
+            return false;
+        }
         return true;
+    }
+    isKonckWall() {
+        if (this.snakeBody[0].x < 0 || this.snakeBody[0].x > this.config.cellX || this.snakeBody[0].y < 0 || this.snakeBody[0].y > this.config.cellY) {
+            console.log('Game Over!');
+            return true;
+        }
+    }
+    isKonckSelf() {
+        for (let i = 1; i < this.snakeBody.length; i++) {
+            if (this.snakeBody[0].x === this.snakeBody[i].x && this.snakeBody[0].y === this.snakeBody[i].y) {
+                console.log('commit suicide');
+                return true;
+            }
+        }
     }
     setDirection(direction: Direction) {
         // 上: 38 -> 1 下: 40 -> 2 左: 37 -> 3 右: 39 -> 4
-        this.nextDir = direction;
-        this.direction = this.nextDir;
+        this.nextDir = this.direction = direction;
     }
 }
 
