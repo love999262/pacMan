@@ -7,7 +7,7 @@ const utils = {
     $(selector: string) {
         return document.querySelectorAll(selector);
     },
-    getRandomPosition(rangeX: number, rangeY: number): randomPosiInterface{
+    getRandomPosition(rangeX: number, rangeY: number): randomPosiInterface {
         const x = Math.floor(Math.random() * rangeX);
         const y = Math.floor(Math.random() * rangeY);
         return {

@@ -10,7 +10,7 @@ interface GameInterface {
     borderColor?: string; // 画布描边
     snakeColor?: string; // 蛇的颜色
     snakeSize?: number; // 蛇的大小
-    snakeSpeed?: number; //蛇的速度
+    snakeSpeed?: number; //蛇的速度 1-10
 }
 
 enum Direction {
@@ -23,43 +23,47 @@ enum Direction {
 const $ = utils.$;
 class Game {
     ctx: CanvasRenderingContext2D;
+    snake: Snake;
+    map: Map;
     constructor(configuration?: GameInterface) {
         const defaultConfig = {
             selector: '#app',
-            width: 1000,
-            height: 1000,
+            width: 500,
+            height: 500,
             bgColor: '#000',
             borderColor: '#fff',
             snakeColor: '#68c867',
             snakeSize: 10,
+            snakeSpeed: 100,
         }
         const config = (<any>Object).assign(defaultConfig, configuration);
         this.createCanvas(config);
         const snakeConfig = (<any>Object).assign({}, config, { ctx: this.ctx });
         const mapConfig = (<any>Object).assign({}, config, { ctx: this.ctx });
-        const snake = new Snake(snakeConfig);
-        const map = new Map(mapConfig);
+        this.snake = new Snake(snakeConfig);
+        this.map = new Map(mapConfig);
+        this.bind();
     }
     private bind() {
         document.addEventListener('keyup', (e) => {
             e.preventDefault();
             switch (e.keyCode) {
                 case 38:
-                // 上
-                
-                break;
+                    // 上
+                    this.snake.setDirection(Direction.Up);
+                    break;
                 case 40:
-                // 下
-                
-                break;
+                    // 下
+                    this.snake.setDirection(Direction.Down);
+                    break;
                 case 37:
-                // 左
-                
-                break;
+                    // 左
+                    this.snake.setDirection(Direction.Left);
+                    break;
                 case 39:
-                // 右
-
-                break;
+                    // 右
+                    this.snake.setDirection(Direction.Right);
+                    break;
             }
         });
     }
@@ -76,11 +80,11 @@ class Game {
         const ctx = canvas.getContext('2d');
         this.ctx = ctx;
         ctx.fillStyle = config.bgColor;
-        ctx.fillRect(0, 0, w, h);
         ctx.strokeStyle = config.borderColor;
         ctx.lineWidth = 5;
         ctx.lineCap = 'butt';
         ctx.strokeRect(0, 0, w, h);
+        ctx.fillRect(0, 0, w, h);
         selector[0].appendChild(canvas);
     }
 
