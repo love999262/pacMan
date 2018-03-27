@@ -64,6 +64,9 @@ class Snake {
             y: _y,
         }
     }
+    growup() {
+        this.snakeBody.length++;
+    }
     snakeMove() {
         const config = this.config;
         utils.refreshMap({

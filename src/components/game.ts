@@ -49,15 +49,16 @@ class Game {
             cellX: this.cellX,
             cellY: this.cellY,
         });
+        this.snake = new Snake(snakeConfig);
         const mapConfig = (<any>Object).assign({}, config, { 
             ctx: this.ctx,
             cellX: this.cellX,
             cellY: this.cellY,
+            snake: this.snake,
          });
-        this.snake = new Snake(snakeConfig);
         this.reward = new Reward(mapConfig);
         this.bind();
-        const interval = () => {
+        const intervalTimer = () => {
             const timer = setTimeout(() => {
                 if (!this.snake.snakeMove()) {
                     // Game Over
@@ -71,15 +72,15 @@ class Game {
                     size: config.snakeSize,
                 });
                 if (this.snake.snakeBody[0].x === this.reward.getRewardPoint().x && this.snake.snakeBody[0].y === this.reward.getRewardPoint().y) {
-                    
-                    // this.reward.refreshReward();
+                    this.snake.growup();
+                    this.reward.refreshReward();
                 }
                 const _timer = setTimeout(() => {
-                    interval();
+                    intervalTimer();
                 }, this.snake.speedBase / config.snakeSpeed);
             }, this.snake.speedBase / config.snakeSpeed);
         }
-        interval();
+        intervalTimer();
     }
     private bind() {
         document.addEventListener('keyup', (e) => {
