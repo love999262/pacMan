@@ -1,0 +1,8 @@
+@import './global.scss';
+
+.#{$snake} {
+    border: 10px solid $border-color;
+    display: block;
+    margin: 0 auto;
+    margin-top: 100px;
+}

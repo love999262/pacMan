@@ -1,9 +1,10 @@
 import utils from './utils';
 import Reward from './reward';
 import Snake from './snake';
-
+// import Controller from './controller';
 interface GameInterface {
-    selector?: string; // 选择器名
+    selector?: string; // 要挂载的选择器名
+    className?: string; // canvas类名
     width?: number; // 画布宽度
     height?: number; // 画布高度
     bgColor?: string; // 画布背景色
@@ -11,7 +12,7 @@ interface GameInterface {
     snakeColor?: string; // 蛇的颜色
     snakeSize?: number; // 蛇的大小
     snakeSpeed?: number; //蛇的速度 1-10
-    rewardColor?: string;
+    rewardColor?: string; // 果实颜色
 }
 
 enum Direction {
@@ -31,6 +32,7 @@ class Game {
     constructor(configuration?: GameInterface) {
         const defaultConfig = {
             selector: '#app',
+            className: '',
             width: 500,
             height: 500,
             bgColor: '#000',
@@ -122,6 +124,7 @@ class Game {
         if (!canvas) {
             return false;
         }
+        canvas.className = config.className;
         const w = config.width
         const h = config.height;
         const selector = $(config.selector);

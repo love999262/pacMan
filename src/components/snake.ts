@@ -23,46 +23,40 @@ class Snake {
     private snakeLength: number = 5; // 初始化的length
     constructor(config: SnakeInterface) {
         this.config = config;
-        const initalPos = utils.getRandomPoint(config.cellX, config.cellY);
+        const initalPos = this.getinitalPos(10); // 初始化位置与周边保留一定安全距离
         this.initialX = initalPos.x;
         this.initialY = initalPos.y;
-        const initDir = Direction.Right;
+        const initDir = Math.ceil(4 * Math.random());
         this.setDirection(initDir);
+        switch (initDir) {
+            case Direction.Up:
+                this.initialY--;
+                break;
+            case Direction.Down:
+                this.initialY++;
+                break;
+            case Direction.Left:
+                this.initialX--;
+                break;
+            case Direction.Right:
+                this.initialX++;
+                break;
+        }
         for (let i = 0; i < this.snakeLength; i++) {
             this.snakeBody.push({
-                x: this.initialX--,
+                x: this.initialX,
                 y: this.initialY,
             });
         }
 
     }
-    judjeDir(o: SnakeBodyInterface) {
-        const config = this.config;
-        let _x;
-        let _y;
-        switch (this.nextDir) {
-            case (Direction.Up):
-                _x = o.x;
-                _y = o.y -= config.snakeSize;
-                break;
-            case (Direction.Down):
-                _x = o.x;
-                _y = o.y += config.snakeSize;
-                break;
-            case (Direction.Left):
-                _x = o.x -= config.snakeSize;
-                _y = o.y;
-                break;
-            case (Direction.Right):
-                _x = o.x += config.snakeSize;
-                _y = o.y;
-                break;
+    private getinitalPos(safaDistance: number = 10) {
+        const initalPos = utils.getRandomPoint(this.config.cellX, this.config.cellY);
+        console.log(initalPos);
+        if ((initalPos.x <= safaDistance || (this.config.cellX - initalPos.x) <= safaDistance) || (initalPos.y <= safaDistance || (this.config.cellY - initalPos.y) <= safaDistance)) {
+            this.getinitalPos(safaDistance);
         }
-
-        return {
-            x: _x,
-            y: _y,
-        }
+        return initalPos;
     }
     growup() {
         this.snakeBody.length++;
